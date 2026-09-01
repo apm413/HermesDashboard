@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>Hermes Dashboard — Design Comparison</title>
+<style>
+body { margin: 0; padding: 16px; background: #0a0a12; color: #ddd; font-family: 'JetBrains Mono', monospace; }
+h1 { text-align: center; color: #C9A24A; font-family: 'Cinzel', serif; letter-spacing: 4px; }
+.grid { display: grid; grid-template-columns: 1fr; gap: 32px; max-width: 1600px; margin: 0 auto; }
+.row { display: grid; grid-template-columns: 200px 1fr; gap: 16px; align-items: start; border-bottom: 1px solid #2a2a3a; padding-bottom: 16px; }
+.row .label { background: #15101F; border: 1px solid #C9A24A; padding: 16px; border-radius: 8px; }
+.row .label .num { font-family: 'Cinzel'; font-size: 28px; color: #C9A24A; font-weight: bold; }
+.row .label h2 { margin: 8px 0 6px 0; color: #fff; font-size: 16px; font-family: 'Cinzel', serif; }
+.row .label p { margin: 4px 0; font-size: 11px; color: #888; line-height: 1.4; }
+.row .label .keywords { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+.row .label .kw { background: #2a1f12; color: #C9A24A; padding: 2px 6px; border-radius: 2px; font-size: 10px; }
+.row iframe { width: 100%; height: 600px; border: 1px solid #2a2a3a; border-radius: 8px; background: #0B0810; }
+.foot { text-align: center; padding: 20px; color: #666; font-size: 11px; }
+</style>
+</head>
+<body>
+<h1>HERMES DASHBOARD — DESIGN COMPARISON</h1>
+<p style="text-align:center;color:#666;">Один и тот же backend, тот же лог-стрим. Только CSS. Выбери любимый.</p>
+
+<div class="grid">
+
+<div class="row">
+<div class="label">
+  <div class="num">V1</div>
+  <h2>Neomechanicum 2099</h2>
+  <p>Тот дизайн, что в промте: латунь + яркий циан + пар. Основной неон-cyan #2DE2FF, пар снизу, брасс-углы и заклёпки. Баланс steampunk и modern.</p>
+  <div class="keywords">
+    <span class="kw">латунь</span><span class="kw">циан</span><span class="kw">пар</span><span class="kw">заклёпки</span><span class="kw">6-гранные лампы</span>
+  </div>
+</div>
+<iframe src="/preview.html?v=1"></iframe>
+</div>
+
+<div class="row">
+<div class="label">
+  <div class="num">V2</div>
+  <h2>Chrono-Atelier</h2>
+  <p>Викторианский циферблат. Круглые табы как циферблаты, ridged-рамки, мягкий циан. Больше латуни, меньше неона. Для ценителей хронографов.</p>
+  <div class="keywords">
+    <span class="kw">латунь</span><span class="kw">хронограф</span><span class="kw">викторианский</span><span class="kw">ridge-рамки</span><span class="kw">без неона</span>
+  </div>
+</div>
+<iframe src="/preview.html?v=2"></iframe>
+</div>
+
+<div class="row">
+<div class="label">
+  <div class="num">V3</div>
+  <h2>Cyberscope Neon</h2>
+  <p>Голограмма из sci-fi: минимум брассы, основной яркий циан #00FFE0, марширующие пунктирные рёбра, углы 90°, скан-линии. Модерн без ретро-налёта.</p>
+  <div class="keywords">
+    <span class="kw">циан</span><span class="kw">неон</span><span class="kw">grid</span><span class="kw">угловатый</span><span class="kw">sci-fi</span>
+  </div>
+</div>
+<iframe src="/preview.html?v=3"></iframe>
+</div>
+
+<div class="row">
+<div class="label">
+  <div class="num">V4</div>
+  <h2>Anatomical Engine</h2>
+  <p>Чертёжная тема: пунктирные рамки узлов, скошенные углы (clip-path),), модульная сетка на фоне. Как инженерный чертёж в ретро-стиле.</p>
+  <div class="keywords">
+    <span class="kw">чертежи</span><span class="kw">латунь</span><span class="kw">пунктир</span><span class="kw">скошенные</span><span class="kw">сетка</span>
+  </div>
+</div>
+<iframe src="/preview.html?v=4"></iframe>
+</div>
+
+<div class="row">
+<div class="label">
+  <div class="num">V5</div>
+  <h2>Foundry Furnace</h2>
+  <p>Кузнечный цех: оранжевый неон FF7A28, медные трубки, тёмный тёплый фон. Агрессивный, для дашборда где реально что-то горит. Мой фаворит по энергии.</p>
+  <div class="keywords">
+    <span class="kw">оранж</span><span class="kw">кузнец</span><span class="kw">медь</span><span class="kw">тёплый</span><span class="kw">энергия</span>
+  </div>
+</div>
+<iframe src="/preview.html?v=5"></iframe>
+</div>
+
+</div>
+
+<div class="foot">
+<p>Выбери вариант → отпиши в чате его номер. Дальше: доработаю, заменю основной CSS, сделаю финальные скриншоты.</p>
+<p style="font-size:10px;color:#444;">v1-neomechanicum / v2-chrono-atelier / v3-cyberscope-neon / v4-anatomical-engine / v5-foundry-furnace</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hermes Dashboard — Дизайн-превью</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+  <!-- Динамический CSS: /preview.html?v=2 грузит v2-chrono-atelier.css и т.д. -->
+  <link id="variant-css" rel="stylesheet" href="style.css" />
+  <script>
+    (function() {
+      const params = new URLSearchParams(location.search);
+      const v = params.get('v') || '1';
+      const name = ({
+        '1': 'v1-neomechanicum',
+        '2': 'v2-chrono-atelier',
+        '3': 'v3-cyberscope-neon',
+        '4': 'v4-anatomical-engine',
+        '5': 'v5-foundry-furnace',
+      })[v] || 'v1-neomechanicum';
+      // CSS лежит в ../screenshots/variants/<name>.css (относительно dist/)
+      const link = document.getElementById('variant-css');
+      link.href = `../screenshots/variants/${name}.css`;
+      document.title = `Hermes Dashboard — ${name}`;
+    })();
+  </script>
+  <style>
+    /* Switcher bar поверх UI */
+    #variant-switcher {
+      position: fixed; top: 8px; right: 8px; z-index: 9999;
+      background: rgba(0,0,0,.7); padding: 6px 10px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      border-radius: 4px; backdrop-filter: blur(8px);
+      display: flex; gap: 4px;
+    }
+    #variant-switcher a {
+      color: #ccc; padding: 2px 6px; border: 1px solid #444; border-radius: 2px;
+      text-decoration: none;
+    }
+    #variant-switcher a:hover { color: #fff; background: rgba(255,255,255,.1); }
+  </style>
+</head>
+<body>
+  <div id="variant-switcher">
+    <a href="?v=1">V1</a><a href="?v=2">V2</a><a href="?v=3">V3</a><a href="?v=4">V4</a><a href="?v=5">V5</a>
+  </div>
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script>
+    window.__HERMES_PLUGIN_SDK__ = {
+      React: window.React,
+      hooks: window.React,
+      components: {},
+      fetchJSON(path, opts) {
+        return fetch(path, opts).then(r => {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        });
+      },
+    };
+    window.__HERMES_PLUGINS__ = {
+      _list: [],
+      register(name, Component) {
+        this._list.push({ name, Component });
+        const last = this._list[this._list.length - 1];
+        const root = document.getElementById('root');
+        if (last && root) {
+          const el = window.React.createElement(last.Component);
+          window.ReactDOM.createRoot(root).render(el);
+        }
+      },
+    };
+  </script>
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "hermes-dashboard",
+  "label": "Hermes Dashboard",
+  "description": "Steampunk-обвязка над агентами HermeSvideo и tier1-traffic-studio: DAG, логи, бюджет, подключения.",
+  "icon": "Gauge",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/hermes-dashboard",
+    "position": "after:sessions"
+  },
+  "entry": "dist/index.js",
+  "css": "dist/style.css",
+  "api": "plugin_api.py"
+}

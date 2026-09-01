@@ -1,0 +1,8 @@
+name: hermes-dashboard
+version: 0.1.0
+kind: backend
+description: >
+  Steampunk dashboard для визуализации агентов HermeSvideo + tier1-traffic-studio.
+  DAG-граф, лог-стрим, Connected-панель, бюджет.
+author: CarlosRi
+entry: dashboard/plugin_api.py
