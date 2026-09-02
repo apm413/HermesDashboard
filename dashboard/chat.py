@@ -16,10 +16,20 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List
 
-# Корень tier1 (через симлинк C:\\Users\\CarlosRi\\Desktop\\studio → tier1-fresh)
-TIER1_ROOT = Path(r"C:/Users/CarlosRi/Desktop/tier1-fresh")
-TIER1_STUDIO_LINK = Path(r"C:/Users/CarlosRi/Desktop/studio")
-HERMESVIDEO_ROOT = Path(r"C:/Users/CarlosRi/HermeSvideo")
+# Пути к проектам — overridable через переменные окружения.
+# По умолчанию ожидается стандартное расположение C:\\Users\\<user>\\...
+TIER1_ROOT = Path(os.environ.get(
+    "HERMES_DASHBOARD_TIER1_ROOT",
+    r"C:/Users/CarlosRi/Desktop/tier1-fresh"
+))
+TIER1_STUDIO_LINK = Path(os.environ.get(
+    "HERMES_DASHBOARD_TIER1_STUDIO",
+    r"C:/Users/CarlosRi/Desktop/studio"
+))
+HERMESVIDEO_ROOT = Path(os.environ.get(
+    "HERMES_DASHBOARD_HERMESVIDEO_ROOT",
+    r"C:/Users/CarlosRi/HermeSvideo"
+))
 HERMES_DASHBOARD_DIR = Path(__file__).parent.resolve()
 
 # Реестр известных команд (для автокомплита в UI)
@@ -157,7 +167,7 @@ async def chat_message(text: str) -> Dict[str, Any]:
         if cmd in LOCAL_COMMANDS:
             pass  # обработаем ниже как echo
         else:
-            return {"ok": True, "type": "exec", **await execute_command(cmd)}
+            return {"ok": True, "type": "exec", **_friendly_exec(cmd, await execute_command(cmd))}
 
     if cmd == "budget":
         # Бюджет HermeSvideo через budget.py (синхронно, быстро)
@@ -185,6 +195,27 @@ async def chat_message(text: str) -> Dict[str, Any]:
         "echo": text,
         "hint": "Это не slash-команда. Введи /help для списка.",
     }
+def _friendly_exec(cmd: str, result: Dict[str, Any]) -> Dict[str, Any]:
+    """Превращает exit=2 от bootstrap/verify_keys в понятный human-friendly месседж.
+
+    Без этой обёртки Carlos увидел бы просто "exit=2" в чате и не понял бы,
+    что не сконфигурированы .env-ключи для RunPod/Heleket/etc.
+    """
+    if result.get("exit_code") == 2 and cmd in ("video:status", "video:verify-keys"):
+        stderr = (result.get("stderr") or "").strip()
+        stdout = (result.get("stdout") or "").strip()
+        # Ищем паттерны "missing"/"no key" — это значит .env пустой
+        full = (stdout + stderr).lower()
+        if "missing" in full or "no key" in full or "xxxx" in full or "не заполнен" in full:
+            result["hint"] = (
+                "HermeSvideo .env не сконфигурирован (нет реальных API-ключей). "
+                "Скопируй `HermeSvideo/.env.template` → `HermeSvideo/.env` и заполни ключи."
+            )
+            result["ok"] = False
+            result["expected"] = True  # Помечаем как "ожидаемая ошибка"
+    return result
+
+
 def _format_budget() -> str:
     """Читает budget из файла (быстро, без HTTP)."""
     from budget import read_budget_snapshot

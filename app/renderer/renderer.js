@@ -95,17 +95,18 @@ async function send(text) {
 }
 
 function handleResponse(j) {
-  if (!j.ok) {
+  if (!j.ok && !j.expected) {
     addMessage(j.error || 'Неизвестная ошибка', 'error');
     return;
   }
   if (j.type === 'exec') {
     const ok = j.exit_code === 0;
     addMessage(
-      ok ? `✓ ${j.cmd}` : `✕ ${j.cmd} (exit ${j.exit_code})`,
-      ok ? 'exec-success' : 'exec-failed',
+      ok ? `✓ ${j.cmd}` : (j.expected ? `⚠ ${j.cmd} (exit ${j.exit_code})` : `✕ ${j.cmd} (exit ${j.exit_code})`),
+      ok ? 'exec-success' : (j.expected ? 'exec-warning' : 'exec-failed'),
       j
     );
+    if (j.hint) addMessage(j.hint, 'system');
   } else if (j.type === 'help') {
     showHelp();
   } else if (j.type === 'echo') {

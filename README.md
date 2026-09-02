@@ -100,7 +100,10 @@ start.bat
 
 ### Скриншот
 
-*(после `npm install` — здесь будет скриншот Electron-окна)*
+![Electron app](screenshots/electron.png)
+
+Слева — dashboard (DAG-граф, system metrics, budget, connected-панель, live-логи).
+Справа — встроенный чат с агентами (slash-команды, автокомплит по Tab, история ↑/↓).
 
 ### Чат-команды
 

@@ -169,6 +169,7 @@ html, body {
 }
 .msg.exec-success pre.cmd-block { border-left-color: var(--neon-cyan); }
 .msg.exec-failed pre.cmd-block { border-left-color: var(--neon-pink); }
+.msg.exec-warning pre.cmd-block { border-left-color: var(--neon-amber); }
 
 .chat-suggest {
   display: none;
