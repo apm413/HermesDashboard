@@ -25,7 +25,7 @@ from probers import probe_all
 from budget import read_budget_snapshot
 from parsers import parse_line, EVENT_PARSED
 from system_metrics import get_system_metrics
-from chat import chat_message, COMMANDS as CHAT_COMMANDS
+from chat_main import chat_message, COMMANDS as CHAT_COMMANDS
 
 LOG = logging.getLogger("hermes-dashboard")
 LOG.setLevel(logging.INFO)
@@ -281,15 +281,32 @@ async def chat_commands() -> Dict[str, Any]:
     return {"commands": CHAT_COMMANDS}
 
 
+@router.get("/chat/models")
+async def chat_models() -> Dict[str, Any]:
+    """Список AI-моделей для dropdown в чате. Подтягивается с OpenRouter.
+
+    Кэш: 1 час. Если OpenRouter недоступен — возвращает FALLBACK_MODELS.
+    """
+    from chat import providers as prov
+    models = await prov.fetch_models_from_openrouter()
+    return {
+        "models": models,
+        "providers": prov.active_providers(),
+        "default": os.environ.get("HERMES_AI_MODEL", "minimax/minimax-m2.7:free"),
+        "current": os.environ.get("HERMES_AI_MODEL", "minimax/minimax-m2.7:free"),
+    }
+
+
 @router.post("/chat")
 async def chat(payload: Dict[str, Any]) -> Dict[str, Any]:
     """Точка входа чат-панели Electron-обёртки.
 
-    Принимает {"text": "..."} или {"text": "/tier1:seo"}.
-    Возвращает {ok, type, ...} где type = exec | help | echo.
+    Принимает {"text": "...", "model": "..."} или {"text": "/tier1:seo"}.
+    Возвращает {ok, type, ...} где type = exec | help | echo | ai.
     """
     text = (payload or {}).get("text", "")
-    return await chat_message(text)
+    model = (payload or {}).get("model")  # None = использовать env-дефолт
+    return await chat_message(text, model=model)
 
 
 @router.get("/tokens")

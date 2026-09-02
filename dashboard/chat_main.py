@@ -139,11 +139,21 @@ async def execute_command(cmd: str, *, timeout: int = 60) -> Dict[str, Any]:
         return {"ok": False, "error": f"{type(e).__name__}: {e}", "cmd": cmd}
 
 
-async def chat_message(text: str) -> Dict[str, Any]:
+async def chat_message(text: str, model: str = None) -> Dict[str, Any]:
     """Главная точка входа: принимает текст от пользователя, возвращает ответ.
 
-    Сначала пробует распарсить как slash-команду, иначе — fallback
-    на эхо + последние события."""
+    Args:
+        text:  вопрос/команда Carlos'а
+        model: ID AI-модели (например "minimax/minimax-m2.7:free").
+               None = использовать env-дефолт.
+
+    Порядок обработки:
+      1) /help / help / ? → список команд
+      2) Slash-команды (/tier1:once, /video:demo, /budget и т.д.) — быстрый
+         command-dispatcher, минуя AI (экономия токенов).
+      3) Всё остальное → AI-чат через OpenRouter. AI-агент сам
+         решает, какие tools вызвать.
+    """
     text = (text or "").strip()
     if not text:
         return {"ok": False, "error": "empty message"}
@@ -163,6 +173,7 @@ async def chat_message(text: str) -> Dict[str, Any]:
     m = re.match(r"^/([a-zA-Z0-9_:\-]+)\b\s*(.*)$", text)
     cmd = m.group(1) if m else text  # для "budget" → "budget", для "/budget" → "budget"
 
+    # Slash-команды идут через command-dispatcher (быстрее, без токенов)
     if cmd in {c["cmd"] for c in COMMANDS}:
         if cmd in LOCAL_COMMANDS:
             pass  # обработаем ниже как echo
@@ -188,13 +199,28 @@ async def chat_message(text: str) -> Dict[str, Any]:
         except Exception as e:
             return {"ok": False, "error": f"logs error: {e}"}
 
-    # Fallback: произвольный текст → эхо + system snapshot
-    return {
-        "ok": True,
-        "type": "echo",
-        "echo": text,
-        "hint": "Это не slash-команда. Введи /help для списка.",
-    }
+    # === AI-ЧАТ (OpenRouter) ===
+    # Сюда попадает ЛЮБОЙ свободный текст (не slash-команда).
+    # AI сам решает, какие tools вызвать (get_budget, run_tier1_agent и т.д.)
+    try:
+        from chat import ai
+        if ai.ai_available():
+            ai_result = await ai.chat_with_ai(text, model=model)
+            return ai_result
+        else:
+            return {
+                "ok": False,
+                "type": "echo",
+                "echo": text,
+                "hint": (
+                    "AI-чат недоступен: OPENROUTER_API_KEY не задан в .env. "
+                    "Добавь ключ в `~/.hermes/.env` или установи Ollama. "
+                    "Пока доступны только slash-команды (/help)."
+                ),
+            }
+    except Exception as e:
+        return {"ok": False, "type": "ai", "error": f"AI chat error: {type(e).__name__}: {e}"}
+
 def _friendly_exec(cmd: str, result: Dict[str, Any]) -> Dict[str, Any]:
     """Превращает exit=2 от bootstrap/verify_keys в понятный human-friendly месседж.
 

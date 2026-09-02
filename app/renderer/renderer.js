@@ -10,11 +10,15 @@ const suggest = $('chat-suggest');
 const statusDot = $('backend-status');
 const resizer = $('resizer');
 const layout = document.querySelector('.layout');
+const modelSelect = $('model-select');
+const modelStatus = $('model-status');
 
 let history = [];
 let historyIdx = -1;
 let commands = [];
+let availableModels = [];
 let ws = null;
+let selectedModel = null;  // Будет загружено из localStorage или с сервера
 
 // === Backend health check ===
 async function checkHealth() {
@@ -82,7 +86,7 @@ async function send(text) {
     const r = await fetch('http://127.0.0.1:5557/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      body: JSON.stringify({ text, model: selectedModel }),
     });
     const j = await r.json();
     handleResponse(j);
@@ -235,6 +239,82 @@ window.addEventListener('mousemove', (e) => {
   layout.style.gridTemplateColumns = `1fr 4px ${chatW}px`;
 });
 
+// === Загрузка моделей для dropdown ===
+async function loadModels() {
+  try {
+    const r = await fetch('http://127.0.0.1:5557/chat/models');
+    if (!r.ok) return;
+    const data = await r.json();
+    availableModels = data.models || [];
+    const defaultId = data.default || 'minimax/minimax-m2.7:free';
+
+    // Сначала попробуем восстановить выбор из localStorage
+    const saved = localStorage.getItem('hermes.chat.model');
+
+    modelSelect.innerHTML = '';
+
+    // Группируем: free сверху, paid ниже
+    const free = availableModels.filter(m => m.free);
+    const paid = availableModels.filter(m => !m.free);
+
+    if (free.length > 0) {
+      const group = document.createElement('optgroup');
+      group.label = `🆓 Бесплатные (${free.length})`;
+      for (const m of free) {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        const ctx = typeof m.context === 'number' ? `${(m.context / 1024).toFixed(0)}k` : '';
+        opt.textContent = `${m.name || m.id} ${ctx ? `[${ctx}]` : ''}`.trim();
+        if (m.id === saved || (!saved && m.id === defaultId)) opt.selected = true;
+        group.appendChild(opt);
+      }
+      modelSelect.appendChild(group);
+    }
+    if (paid.length > 0) {
+      const group = document.createElement('optgroup');
+      group.label = `💳 Платные (${paid.length})`;
+      for (const m of paid) {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = (m.name || m.id).substring(0, 50);
+        if (m.id === saved) opt.selected = true;
+        group.appendChild(opt);
+      }
+      modelSelect.appendChild(group);
+    }
+
+    // Статус провайдеров
+    const providers = data.providers || [];
+    const active = providers.filter(p => p.status === 'active');
+    if (active.length > 0) {
+      modelStatus.textContent = '●';
+      modelStatus.classList.remove('offline');
+      const names = active.map(p => p.name).join(', ');
+      modelStatus.title = `Активные провайдеры: ${names}`;
+    } else {
+      modelStatus.textContent = '○';
+      modelStatus.classList.add('offline');
+      modelStatus.title = 'Нет активных AI-провайдеров. Добавь OPENROUTER_API_KEY в ~/.hermes/.env';
+    }
+
+    selectedModel = modelSelect.value || defaultId;
+    localStorage.setItem('hermes.chat.model', selectedModel);
+  } catch (e) {
+    console.warn('loadModels failed:', e);
+    modelStatus.classList.add('offline');
+    modelStatus.title = 'Ошибка загрузки моделей: ' + e.message;
+  }
+}
+
+modelSelect.addEventListener('change', () => {
+  selectedModel = modelSelect.value;
+  try { localStorage.setItem('hermes.chat.model', selectedModel); } catch (e) {}
+  const m = availableModels.find(m => m.id === selectedModel);
+  if (m) {
+    addMessage(`Модель: ${m.name || m.id}${m.free ? ' (free)' : ''}`, 'system');
+  }
+});
+
 // === Init ===
 (async () => {
   await loadCommands();
@@ -246,4 +326,13 @@ window.addEventListener('mousemove', (e) => {
   );
   setInterval(checkHealth, 5000);
   input.focus();
+
+  // Загрузить модели асинхронно (не блокировать init)
+  loadModels().then(() => {
+    if (selectedModel) {
+      const m = availableModels.find(m => m.id === selectedModel);
+      const label = m ? (m.name || m.id) : selectedModel;
+      addMessage(`AI-модель: ${label}${m && m.free ? ' (free)' : ''}`, 'system');
+    }
+  });
 })();
