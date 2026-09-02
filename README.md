@@ -78,6 +78,62 @@ hermes plugins enable hermes-dashboard
 
 ---
 
+## 🖥️ Десктоп-приложение (Electron)
+
+Отдельное окно с иконкой на рабочем столе. Слева — dashboard, справа — **встроенный чат** для общения с агентами.
+
+### Установка
+
+```bash
+# 1) Запусти install.bat (один раз)
+install.bat
+
+# Что делает:
+#   ✓ Создаёт .venv для backend
+#   ✓ Устанавливает Electron + electron-builder (npm)
+#   ✓ Создаёт ярлык "Hermes Dashboard" на рабочем столе
+
+# 2) Запусти с рабочего стола (двойной клик по иконке)
+#    или вручную:
+start.bat
+```
+
+### Скриншот
+
+*(после `npm install` — здесь будет скриншот Electron-окна)*
+
+### Чат-команды
+
+Введи в правой панели (с префиксом `/` или без):
+
+| Команда | Что делает |
+|---------|-----------|
+| `/help` | Список всех команд |
+| `/tier1:once` | Прогнать все tier1-агенты разом (mock) |
+| `/tier1:seo` `/tier1:reddit` `/tier1:twitter` `/tier1:analytics` | Запустить отдельный tier1-агент |
+| `/video:demo` | Сгенерировать демо-сценарий HermeSvideo |
+| `/video:status` | Проверить состояние ключей/бюджета |
+| `/video:verify-keys` | Проверить API-ключи |
+| `/video:test-all` | Smoke-тест всех video-агентов |
+| `/budget` | Показать дневной/месячный бюджет |
+| `/system` | CPU/RAM/Disk |
+| `/logs` | Последние строки из .log файлов |
+| `просто текст` | Свободный ввод (эхо) |
+
+Автокомплит по `Tab` (например, набери `/t` → `Tab` → `/tier1:twitter`). История — стрелками `↑`/`↓`.
+
+### Сборка portable .exe (Windows)
+
+```bash
+cd app
+npm run build:win
+# → app/dist-app/HermesDashboard-2.0.0-portable.exe (~150 MB)
+```
+
+Portable-версия — single-file, не требует установки, кладётся на флешку.
+
+---
+
 ## Дизайн-варианты
 
 При создании было предложено 5 вариантов (`screenshots/variants/`):

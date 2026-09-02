@@ -1,0 +1,76 @@
+{
+  "name": "hermes-dashboard",
+  "version": "2.0.0",
+  "description": "Steampunk real-time dashboard for AI agent pipelines (HermeSvideo, tier1-traffic-studio) — live DAG, WebSocket logs, system metrics, budget gauge, action buttons, in-app chat.",
+  "main": "main.js",
+  "author": "apm413 (Carlos Rich)",
+  "license": "MIT",
+  "homepage": "https://github.com/apm413/HermesDashboard#readme",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "pack": "electron-builder --dir"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.apm413.hermesdashboard",
+    "productName": "Hermes Dashboard",
+    "directories": {
+      "output": "dist-app",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "build/icon.*",
+      "../start.bat",
+      "../start.sh",
+      "../dashboard/dist/**/*",
+      "../dashboard/plugin_api.py",
+      "../dashboard/log_tailer.py",
+      "../dashboard/parsers.py",
+      "../dashboard/probers.py",
+      "../dashboard/budget.py",
+      "../dashboard/chat.py",
+      "../dashboard/system_metrics.py",
+      "../dashboard/manifest.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../.venv",
+        "to": ".venv"
+      },
+      {
+        "from": "../requirements.txt",
+        "to": "requirements.txt"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "HermesDashboard-${version}-portable.exe"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    }
+  }
+}

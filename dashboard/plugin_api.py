@@ -25,6 +25,7 @@ from probers import probe_all
 from budget import read_budget_snapshot
 from parsers import parse_line, EVENT_PARSED
 from system_metrics import get_system_metrics
+from chat import chat_message, COMMANDS as CHAT_COMMANDS
 
 LOG = logging.getLogger("hermes-dashboard")
 LOG.setLevel(logging.INFO)
@@ -272,6 +273,23 @@ async def budget() -> Dict[str, Any]:
 async def system_metrics() -> Dict[str, Any]:
     """CPU/RAM/Disk/Net через psutil, кеш 1 сек."""
     return get_system_metrics()
+
+
+@router.get("/chat/commands")
+async def chat_commands() -> Dict[str, Any]:
+    """Список доступных slash-команд для автокомплита в чат-панели."""
+    return {"commands": CHAT_COMMANDS}
+
+
+@router.post("/chat")
+async def chat(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """Точка входа чат-панели Electron-обёртки.
+
+    Принимает {"text": "..."} или {"text": "/tier1:seo"}.
+    Возвращает {ok, type, ...} где type = exec | help | echo.
+    """
+    text = (payload or {}).get("text", "")
+    return await chat_message(text)
 
 
 @router.get("/tokens")
